@@ -60,12 +60,17 @@ class datatransforation:
             numerical_columns = ['writing_score', 'reading_score']
             input_feature_train_df = train_df.drop(columns=[target_column_name], axis=1)
             target_feature_train_df = train_df[target_column_name]
+            #it is separated from the training data sos that the transformation is not applied on the target column
             input_feature_test_df = test_df.drop(columns=[target_column_name], axis=1)  
             target_feature_test_df = test_df[target_column_name]
             logging.info('Applying preprocessing object on training and testing dataframes')
             input_feature_train_arr = preprocessing_obj.fit_transform(input_feature_train_df)
+            #we use fit_transform on training data because we want to fit the preprocessor on training data and then transform it
             input_feature_test_arr = preprocessing_obj.transform(input_feature_test_df)
+            #we don't use fit_transform on test data because we don't wanna learn from the test data. We only want to transform it based on what we learned from the training data.
+            #if one applies fit_transform on test data, it will lead to data leakage(i.e., good performance on test data but poor performance on real world data)
             train_arr = np.c_[input_feature_train_arr, np.array(target_feature_train_df)]
+            #The np.c_ (short for column-wise concatenation) is a special object in NumPy that allows you to stack arrays horizontally (side-by-side)
             test_arr = np.c_[input_feature_test_arr,np.array(target_feature_test_df)]
             logging.info('saved preprocessing object')
             save_object(file_path= self.data_transformation_config.preprocessor_obj_file_path,
